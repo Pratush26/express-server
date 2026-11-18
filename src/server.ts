@@ -107,43 +107,21 @@ app.post("/api/user", async (req: Request, res: Response) => {
 app.put("/api/user/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, password, age } = req.body;
-
-    const fields = [];
-    const values = [];
-
-    if (name !== undefined) {
-      values.push(name);
-      fields.push(`name = $${values.length}`);
-    }
-
-    if (password !== undefined) {
-      values.push(password);
-      fields.push(`password = $${values.length}`);
-    }
-
-    if (age !== undefined) {
-      values.push(age);
-      fields.push(`age = $${values.length}`);
-    }
-
-    if (fields.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "No fields provided for update!",
-      });
-    }
-
-    values.push(id);
+    const { name, password, is_active, age } = req.body;
 
     const result = await pool.query(
       `
-        UPDATE users
-        SET ${fields.join(", ")}
-        WHERE id::TEXT = $${values.length} OR email = $${values.length}
-        RETURNING *;
+        UPDATE users 
+        SET
+        name = COALESCE($1, name),  
+        password = COALESCE($2, password),
+        age = COALESCE($3, age),
+        is_active = COALESCE($4, is_Active),
+        updated_at = NOW()
+        WHERE id::TEXT = $5 OR email = $5
+        RETURNING *
       `,
-      values,
+      [name ?? null, password ?? null, age ?? null, is_active ?? null, id],
     );
 
     if (result.rowCount === 0) {
