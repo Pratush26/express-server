@@ -5,4 +5,4 @@ const router = Router();
 router.get("/", (req: Request, res: Response) => {
   res.send("Welcome to express server!");
 });
-export const rootRouter = router;
+export const rootRoute = router;
