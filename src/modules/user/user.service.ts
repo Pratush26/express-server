@@ -19,6 +19,7 @@ const getUserFromDB = async (payload: string | number) => {
   );
   return result;
 };
+
 const createUserIntoDB = async (payload: IUser) => {
   const { name, email, password, age } = payload;
   const hashPassword = await bcrypt.hash(password, 10);
@@ -30,9 +31,48 @@ const createUserIntoDB = async (payload: IUser) => {
   );
   return result;
 };
+const updateUserFromDB = async ({
+  id,
+  payload,
+}: {
+  id: string | number;
+  payload: Partial<IUser>;
+}) => {
+  const { name, email, password, age } = payload;
+
+  const result = await pool.query(
+    `
+      UPDATE users
+      SET
+        name = COALESCE($1, name),
+        email = COALESCE($2, email),
+        password = COALESCE($3, password),
+        age = COALESCE($4, age),
+        updated_at = NOW()
+      WHERE id = $5
+      RETURNING *
+    `,
+    [name ?? null, email ?? null, password ?? null, age ?? null, id],
+  );
+
+  return result;
+};
+const deleteUserFromDB = async (payload: string | number) => {
+  const result = await pool.query(
+    `
+        DELETE FROM users
+        WHERE id::TEXT = $1 OR email = $1
+        RETURNING *;
+      `,
+    [payload],
+  );
+  return result;
+};
 
 export const userService = {
   getAllUsersFromDB,
   getUserFromDB,
   createUserIntoDB,
+  updateUserFromDB,
+  deleteUserFromDB,
 };
