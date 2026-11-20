@@ -9,6 +9,7 @@ import { profileRoute } from "./modules/profile/profile.route";
 import cors from "cors";
 import globalErrorHandler from "./middleware/globalErrorHandler";
 import config from "./config";
+import cookieParser from "cookie-parser";
 
 const app: Application = express();
 const corsOptions = {
@@ -19,12 +20,13 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // app.use(logger);
 
 app.use("/", rootRoute);
 app.use("/api/auth", authRoute);
-app.use("/api/users", userRoute);
+app.use("/api/user", userRoute);
 app.use("/api/profile", profileRoute);
 
 app.use(globalErrorHandler);

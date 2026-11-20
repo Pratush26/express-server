@@ -6,8 +6,10 @@ dotenv.config({
 
 const config = {
   port: process.env.PORT,
+  node_env: process.env.NODE_ENV as string,
   connection_string: process.env.DB_URL as string,
   auth_secret: process.env.JWT_SECRET as string,
+  auth_refresh_secret: process.env.JWT_REFRESH_SECRET as string,
   origins: process.env.FRONTENDS?.split(",")
 };
 
