@@ -5,7 +5,7 @@ import { rootRoute } from "./modules/root/root.route";
 import { userRoute } from "./modules/user/user.route";
 import { authRoute } from "./modules/auth/auth.route";
 import { profileRoute } from "./modules/profile/profile.route";
-import logger from "./middleware/logger";
+import { logger } from "./middleware/logger";
 
 const app: Application = express();
 
