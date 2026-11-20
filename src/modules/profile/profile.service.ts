@@ -37,7 +37,7 @@ const createProfileIntoDB = async (payload: IProfile) => {
     `
         INSERT INTO profiles (bio, address, phone, links, is_active) VALUES ($1, $2, $3, $4, $5)
         `,
-    [bio, address, phone, links true],
+    [bio, address, phone, links, true],
   );
   return result;
 };
