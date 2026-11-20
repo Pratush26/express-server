@@ -1,15 +1,13 @@
 import type { Request, Response } from "express";
 import { authService } from "./auth.service";
 import config from "../../config";
+import sendResponse from "../../utils/sendResponse";
 
 const loginUser = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(400).json({
-        success: false,
-        message: "Creadentials are missing!!",
-      });
+      sendResponse(false, 400, res, { message: "Creadentials are missing!!" });
     }
     const result = await authService.loginUserByDB({ email, password});
 
@@ -22,15 +20,13 @@ const loginUser = async (req: Request, res: Response) => {
       path: "/",
       // domain: 
     })
-    res.status(200).json({
-      success: true,
+    sendResponse(true, 200, res, {
       message: "User login successfully!",
       data: result.user,
       token: result.accessToken,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
+    sendResponse(false, 500, res, {
       message: err instanceof Error ? err.message : "Something went wrong",
       error: err,
     });
@@ -40,14 +36,12 @@ const generateToken = async (req: Request, res: Response) => {
   try {
     const result = await authService.generateAccessToken(req.cookies.refreshToken);
 
-    res.status(200).json({
-      success: true,
+    sendResponse(true, 200, res, {
       message: "Access token generated successfully!",
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
+    sendResponse(false, 500, res, {
       message: err instanceof Error ? err.message : "Something went wrong",
       error: err,
     });

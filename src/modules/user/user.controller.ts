@@ -1,14 +1,12 @@
 import type { Request, Response } from "express";
 import { userService } from "./user.service";
+import sendResponse from "../../utils/sendResponse";
 
 const createUser = async (req: Request, res: Response) => {
   try {
     const { name, email, password, age } = req.body;
     if (!name || !email || !password || !age) {
-      res.status(400).json({
-        success: false,
-        message: "Some data are missing!!",
-      });
+      sendResponse(false, 400, res, {  message: "Some data are missing!!" });
     }
     const result = await userService.createUserIntoDB({
       name,
@@ -18,19 +16,14 @@ const createUser = async (req: Request, res: Response) => {
     });
 
     if (result.rowCount === 0) {
-      res.status(404).json({
-        success: false,
-        message: "Users not found!!",
-      });
+      sendResponse(false, 404, res, { message: "Users not found!!" });
     }
-    res.status(200).json({
-      success: true,
+    sendResponse(true, 200, res, {
       message: "Users retrived successfully!",
       data: result.rows,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
+    sendResponse(false, 500, res, {
       message: err instanceof Error ? err.message : "Something went wrong",
       error: err,
     });
@@ -42,19 +35,14 @@ const getAllUsers = async (req: Request, res: Response) => {
     const result = await userService.getAllUsersFromDB();
 
     if (result.rowCount === 0) {
-      res.status(404).json({
-        success: false,
-        message: "Users not found!!",
-      });
+      sendResponse(false, 404, res, { message: "Users not found!!" });
     }
-    res.status(200).json({
-      success: true,
+    sendResponse(true, 200, res, {
       message: "Users retrived successfully!",
       data: result.rows,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
+    sendResponse(false, 500, res, {
       message: err instanceof Error ? err.message : "Something went wrong",
       error: err,
     });
@@ -67,19 +55,14 @@ const getUser = async (req: Request, res: Response) => {
     const result = await userService.getUserFromDB(id as string | number);
 
     if (result.rowCount === 0) {
-      res.status(404).json({
-        success: false,
-        message: "Users not found!!",
-      });
+      sendResponse(false, 404, res, { message: "Users not found!!" });
     }
-    res.status(200).json({
-      success: true,
+    sendResponse(true, 200, res, {
       message: "Users retrived successfully!",
       data: result.rows,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
+    sendResponse(false, 500, res, {
       message: err instanceof Error ? err.message : "Something went wrong",
       error: err,
     });
@@ -91,10 +74,7 @@ const updateUser = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name, email, password, age } = req.body;
     if (!id || typeof id !== "string" || typeof id !== "number") {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid user ID",
-      });
+      return sendResponse(false, 400, res, { message: "Invalid user ID" });
     }
     const result = await userService.updateUserFromDB({
       id,
@@ -102,20 +82,15 @@ const updateUser = async (req: Request, res: Response) => {
     });
 
     if (result.rowCount === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found!",
-      });
+      return sendResponse(false, 404, res, { message: "User not found!" });
     }
 
-    return res.status(200).json({
-      success: true,
+    return sendResponse(true, 200, res, {
       message: "User updated successfully!",
       data: result.rows[0],
     });
   } catch (err) {
-    return res.status(500).json({
-      success: false,
+    return sendResponse(false, 500, res, {
       message: err instanceof Error ? err.message : "Something went wrong",
     });
   }
@@ -127,19 +102,14 @@ const deleteUser = async (req: Request, res: Response) => {
     const result = await userService.deleteUserFromDB(id as string | number);
 
     if (result.rowCount === 0) {
-      res.status(404).json({
-        success: false,
-        message: "User not found for deleting!",
-      });
+      sendResponse(false, 404, res, { message: "User not found for deleting!" });
     }
-    res.status(200).json({
-      success: true,
+    sendResponse(true, 200, res, {
       message: "User deleted successfully!",
       data: result.rows,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
+    sendResponse(false, 500, res, {
       message: err instanceof Error ? err.message : "Something went wrong",
       error: err,
     });

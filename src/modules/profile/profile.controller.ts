@@ -1,14 +1,12 @@
 import type { Request, Response } from "express";
 import { profileService } from "./profile.service";
+import sendResponse from "../../utils/sendResponse";
 
 const createProfile = async (req: Request, res: Response) => {
   try {
     const { name, email, password, age } = req.body;
     if (!name || !email || !password || !age) {
-      res.status(400).json({
-        success: false,
-        message: "Some data are missing!!",
-      });
+      sendResponse(false, 400, res, { message: "Some data are missing!!" });
     }
     const result = await profileService.createProfileIntoDB({
       name,
@@ -18,19 +16,14 @@ const createProfile = async (req: Request, res: Response) => {
     });
 
     if (result.rowCount === 0) {
-      res.status(404).json({
-        success: false,
-        message: "Profiles not found!!",
-      });
+      sendResponse(false, 404, res, { message: "Profiles not found!!" });
     }
-    res.status(200).json({
-      success: true,
+    sendResponse(true, 200, res, {
       message: "Profiles retrived successfully!",
       data: result.rows,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
+    sendResponse(false, 500, res, {
       message: err instanceof Error ? err.message : "Something went wrong",
       error: err,
     });
@@ -42,19 +35,14 @@ const getAllProfiles = async (req: Request, res: Response) => {
     const result = await profileService.getAllProfilesFromDB();
 
     if (result.rowCount === 0) {
-      res.status(404).json({
-        success: false,
-        message: "Profiles not found!!",
-      });
+      sendResponse(false, 404, res, { message: "Profiles not found!!" });
     }
-    res.status(200).json({
-      success: true,
+    sendResponse(true, 200, res, {
       message: "Profiles retrived successfully!",
       data: result.rows,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
+    sendResponse(false, 500, res, {
       message: err instanceof Error ? err.message : "Something went wrong",
       error: err,
     });
@@ -67,19 +55,14 @@ const getMyProfile = async (req: Request, res: Response) => {
     const result = await profileService.getMyProfileFromDB(id as string | number);
 
     if (result.rowCount === 0) {
-      res.status(404).json({
-        success: false,
-        message: "Profiles not found!!",
-      });
+      sendResponse(false, 404, res, { message: "Profiles not found!!" });
     }
-    res.status(200).json({
-      success: true,
+    sendResponse(true, 200, res, {
       message: "Profiles retrived successfully!",
       data: result.rows,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
+    sendResponse(false, 500, res, {
       message: err instanceof Error ? err.message : "Something went wrong",
       error: err,
     });
@@ -91,10 +74,7 @@ const updateProfile = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name, email, password, age } = req.body;
     if (!id || typeof id !== "string" || typeof id !== "number") {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid profile ID",
-      });
+      return sendResponse(false, 400, res, { message: "Invalid profile ID" });
     }
     const result = await profileService.updateProfileFromDB({
       id,
@@ -102,20 +82,15 @@ const updateProfile = async (req: Request, res: Response) => {
     });
 
     if (result.rowCount === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Profile not found!",
-      });
+      return sendResponse(false, 404, res, { message: "Profile not found!" });
     }
 
-    return res.status(200).json({
-      success: true,
+    return sendResponse(true, 200, res, {
       message: "Profile updated successfully!",
       data: result.rows[0],
     });
   } catch (err) {
-    return res.status(500).json({
-      success: false,
+    return sendResponse(false, 500, res, {
       message: err instanceof Error ? err.message : "Something went wrong",
     });
   }
@@ -127,19 +102,14 @@ const deleteProfile = async (req: Request, res: Response) => {
     const result = await profileService.deleteProfileFromDB(id as string | number);
 
     if (result.rowCount === 0) {
-      res.status(404).json({
-        success: false,
-        message: "Profile not found for deleting!",
-      });
+      sendResponse(false, 404, res, { message: "Profile not found for deleting!" });
     }
-    res.status(200).json({
-      success: true,
+    sendResponse(true, 200, res, {
       message: "Profile deleted successfully!",
       data: result.rows,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
+    sendResponse(false, 500, res, {
       message: err instanceof Error ? err.message : "Something went wrong",
       error: err,
     });
