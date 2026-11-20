@@ -4,15 +4,16 @@ import sendResponse from "../../utils/sendResponse";
 
 const createProfile = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, age } = req.body;
-    if (!name || !email || !password || !age) {
+    const { userId, bio, address, phone, links } = req.body;
+    if (!userId || !bio || !address || !phone) {
       sendResponse(false, 400, res, { message: "Some data are missing!!" });
     }
     const result = await profileService.createProfileIntoDB({
-      name,
-      email,
-      password,
-      age,
+      userId,
+      bio,
+      address,
+      phone,
+      links: links ?? [],
     });
 
     if (result.rowCount === 0) {
@@ -72,13 +73,13 @@ const getMyProfile = async (req: Request, res: Response) => {
 const updateProfile = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, email, password, age } = req.body;
+    const { userId, bio, address, phone, links } = req.body;
     if (!id || typeof id !== "string" || typeof id !== "number") {
       return sendResponse(false, 400, res, { message: "Invalid profile ID" });
     }
     const result = await profileService.updateProfileFromDB({
       id,
-      payload: { name, email, password, age },
+      payload: { userId, bio, address, phone, links },
     });
 
     if (result.rowCount === 0) {

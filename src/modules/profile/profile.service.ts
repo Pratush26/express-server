@@ -1,10 +1,12 @@
-import bcrypt from "bcryptjs";
 import { pool } from "../../db";
 import type { IProfile } from "./profile.interface";
 
 const getAllProfilesFromDB = async () => {
   const result = await pool.query(`
-    SELECT bio, address, phone FROM profiles  
+    SELECT p.id, p.userId, p.bio, p.address, p.phone, p.links, p.is_active,
+           u.name, u.email, u.age, u.role
+    FROM profiles p
+    LEFT JOIN users u ON u.id = p.userId
       `);
   return result;
 };
@@ -12,8 +14,11 @@ const getAllProfilesFromDB = async () => {
 const getProfileFromDB = async (payload: string | number) => {
   const result = await pool.query(
     `
-        SELECT bio, address, phone, links FROM profiles
-        WHERE userId::TEXT = $1;
+        SELECT p.id, p.userId, p.bio, p.address, p.phone, p.links, p.is_active,
+               u.name, u.email, u.age, u.role
+        FROM profiles p
+        LEFT JOIN users u ON u.id = p.userId
+        WHERE p.userId::TEXT = $1;
       `,
     [payload],
   );
@@ -22,8 +27,11 @@ const getProfileFromDB = async (payload: string | number) => {
 const getMyProfileFromDB = async (payload: string | number) => {
   const result = await pool.query(
     `
-        SELECT bio, address, phone, is_active, links FROM profiles
-        WHERE userId::TEXT = $1;
+        SELECT p.id, p.userId, p.bio, p.address, p.phone, p.links, p.is_active,
+               u.name, u.email, u.age, u.role
+        FROM profiles p
+        LEFT JOIN users u ON u.id = p.userId
+        WHERE p.userId::TEXT = $1;
       `,
     [payload],
   );
@@ -31,13 +39,13 @@ const getMyProfileFromDB = async (payload: string | number) => {
 };
 
 const createProfileIntoDB = async (payload: IProfile) => {
-  const { bio, address, phone, links } = payload;
-  const hashPassword = await bcrypt.hash(password, 10);
+  const { userId, bio, address, phone, links } = payload;
   const result = await pool.query(
     `
-        INSERT INTO profiles (bio, address, phone, links, is_active) VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO profiles (userId, bio, address, phone, links, is_active) VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *
         `,
-    [bio, address, phone, links, true],
+    [userId, bio, address, phone, links ?? [], true],
   );
   return result;
 };
@@ -48,21 +56,22 @@ const updateProfileFromDB = async ({
   id: string | number;
   payload: Partial<IProfile>;
 }) => {
-  const { bio, address, phone, links } = payload;
+  const { userId, bio, address, phone, links } = payload;
 
   const result = await pool.query(
     `
       UPDATE profiles
       SET
-        name = COALESCE($1, name),
-        email = COALESCE($2, email),
-        password = COALESCE($3, password),
-        age = COALESCE($4, age),
+        userId = COALESCE($1, userId),
+        bio = COALESCE($2, bio),
+        address = COALESCE($3, address),
+        phone = COALESCE($4, phone),
+        links = COALESCE($5, links),
         updated_at = NOW()
-      WHERE id = $5
+      WHERE id = $6
       RETURNING *
     `,
-    [name ?? null, email ?? null, password ?? null, age ?? null, id],
+    [userId ?? null, bio ?? null, address ?? null, phone ?? null, links ?? null, id],
   );
 
   return result;
@@ -71,7 +80,7 @@ const deleteProfileFromDB = async (payload: string | number) => {
   const result = await pool.query(
     `
         DELETE FROM profiles
-        WHERE id::TEXT = $1 OR email = $1
+        WHERE id::TEXT = $1 OR userId::TEXT = $1
         RETURNING *;
       `,
     [payload],

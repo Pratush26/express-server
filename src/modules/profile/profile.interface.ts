@@ -3,7 +3,7 @@ export interface IProfile {
     bio: string;
     address: string;
     phone: string;
-    links: string[];
+    links?: string[];
 }
 export interface IProfileRecord extends IProfile {
     id: number;
